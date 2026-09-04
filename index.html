@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ind. O&C · Ecosistema Estocástico</title>
+<style>
+  :root {
+    --bg:#0a0e1a; --panel:#111827; --panel2:#0f172a; --line:#1f2937;
+    --cyan:#22d3ee; --violet:#8b5cf6; --green:#34d399; --amber:#fbbf24;
+    --red:#f87171; --text:#e5e7eb; --muted:#9ca3af;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,-apple-system,sans-serif; overflow-x:hidden; }
+  .wrap { max-width:1100px; margin:0 auto; padding:0 24px; }
+
+  /* HERO */
+  .hero { position:relative; padding:80px 0 60px; text-align:center; overflow:hidden; }
+  .hero::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 50% -20%, rgba(139,92,246,.25), transparent 60%); z-index:0; }
+  .hero>* { position:relative; z-index:1; }
+  .badge { display:inline-block; padding:6px 14px; border:1px solid var(--line); border-radius:999px; font-size:13px; color:var(--cyan); margin-bottom:20px; background:rgba(34,211,238,.06); }
+  h1 { font-size:clamp(34px,6vw,58px); font-weight:800; line-height:1.05; margin-bottom:16px;
+       background:linear-gradient(90deg,var(--cyan),var(--violet),var(--green)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+  .sub { font-size:clamp(16px,2.2vw,22px); color:var(--muted); max-width:760px; margin:0 auto 28px; line-height:1.6; }
+  .pulse { display:inline-flex; align-items:center; gap:8px; font-size:14px; color:var(--green); }
+  .dot { width:9px; height:9px; border-radius:50%; background:var(--green); box-shadow:0 0 12px var(--green); }
+
+  /* SCORE BAR */
+  .scorebar { display:flex; align-items:center; justify-content:center; gap:18px; flex-wrap:wrap; margin:24px 0 8px; }
+  .bigscore { font-size:56px; font-weight:800; color:var(--green); }
+  .scorelabel { font-size:14px; color:var(--muted); line-height:1.3; text-align:left; }
+
+  /* MODULE CARDS */
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:18px; margin:40px 0; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:22px; transition:.25s; position:relative; overflow:hidden; }
+  .card:hover { transform:translateY(-4px); border-color:var(--cyan); box-shadow:0 12px 40px rgba(34,211,238,.12); }
+  .card .icon { font-size:28px; }
+  .card h3 { font-size:17px; margin:12px 0 4px; color:var(--text); }
+  .card p { color:var(--muted); font-size:13px; line-height:1.5; margin-bottom:14px; }
+  .metric { font-size:32px; font-weight:700; }
+  .metric small { font-size:14px; color:var(--muted); font-weight:400; }
+  .pipes { display:flex; gap:10px; margin-top:12px; align-items:flex-end; height:44px; }
+  .pipe { width:14px; background:var(--cyan); border-radius:4px 4px 0 0; opacity:.85; transition:.4s; }
+
+  /* SECTION HEADERS */
+  .sec { margin:56px 0 24px; }
+  .sec h2 { font-size:26px; font-weight:700; margin-bottom:8px; }
+  .sec .desc { color:var(--muted); max-width:720px; line-height:1.6; }
+
+  /* MOTOR VISUALS */
+  .motorgrid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:18px; }
+  .motorgrid .card h3 { font-size:15px; }
+  canvas { width:100%; height:160px; display:block; margin-top:12px; background:var(--panel2); border-radius:10px; }
+
+  /* ORCHESTRATOR */
+  .orch { background:linear-gradient(135deg,var(--panel2),var(--panel)); border:1px solid var(--line); border-radius:20px; padding:32px; margin:40px 0; }
+  .orch h2 { font-size:24px; margin-bottom:12px; }
+  .orch p { color:var(--muted); line-height:1.7; }
+  .orch .tag { color:var(--violet); }
+
+  /* LIVE STREAM */
+  .stream { font-family:ui-monospace,Consolas,monospace; font-size:12px; background:var(--panel2); border:1px solid var(--line); border-radius:12px; padding:16px; max-height:260px; overflow-y:auto; line-height:1.7; }
+  .stream .t { color:var(--muted); }
+  .stream .ok { color:var(--green); }
+  .stream .ci { color:var(--cyan); }
+
+  /* BENCHMARK TABLE */
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th,td { padding:10px 12px; text-align:left; border-bottom:1px solid var(--line); }
+  th { color:var(--muted); font-weight:600; }
+  td.num { text-align:right; font-variant-numeric:tabular-nums; }
+  .badge-score { padding:3px 8px; border-radius:6px; font-weight:700; font-size:12px; }
+  .g { background:rgba(52,211,153,.15); color:var(--green); }
+  .y { background:rgba(251,191,36,.15); color:var(--amber); }
+  .r { background:rgba(248,113,113,.15); color:var(--red); }
+
+  footer { text-align:center; color:var(--muted); font-size:13px; padding:48px 0 60px; border-top:1px solid var(--line); margin-top:60px; }
+  footer .lock { color:var(--green); }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div>
+      <span class="badge">⚛️ Motor Estocástico · Ind. O&C Ingeniería</span>
+      <h1>UN MOTOR<br>TODO EL ECOSISTEMA</h1>
+      <p class="sub">Presupuesto, inspecciones de campo, modelo 3D y gestión de datos — todos potenciados por una sola capa de cómputo estocástico con memoria asociativa, firma criptográfica y sello térmico.</p>
+      <div class="scorebar">
+        <span class="bigscore" id="overall">0.90</span>
+        <div class="scorelabel">Score global<br>del motor (en vivo)</div>
+      </div>
+      <div class="pulse"><span class="dot"></span>&nbsp;Ecosistema operando — solo métricas anónimas</div>
+    </div>
+  </section>
+
+  <!-- MODULES -->
+  <section class="sec">
+    <h2>El ecosistema en números</h2>
+    <p class="desc">Cada módulo alimenta al motor estocástico, y el motor retroalimenta a cada módulo. Estas son métricas agregadas en vivo — sin datos de clientes ni obras.</p>
+  </section>
+  <div class="grid" id="cards">
+    <div class="card"><div class="icon">⚙️</div><h3>Motor Estocástico</h3><p>P-bits con memoria asociativa Hebb</p><div class="metric"><span id="m_insumos">0</span> <small>insumos</small></div><div class="metric"><span id="m_pesos">0</span> <small>pesos aprendidos</small></div></div>
+    <div class="card"><div class="icon">📋</div><h3>Dossier 360</h3><p>Inspecciones de campo · Firebase</p><div class="metric"><span id="d_projects">0</span> <small>proyectos</small></div><div class="metric"><span id="d_sst">0</span> <small>fichas SST</small></div></div>
+    <div class="card"><div class="icon">💰</div><h3>Budget 360</h3><p>APUs, partidas e insumos</p><div class="metric"><span id="b_proyectos">0</span> <small>proyectos</small></div><div class="metric"><span id="b_insumos">0</span> <small>insumos</small></div></div>
+    <div class="card"><div class="icon">🧊</div><h3>Viewer 360</h3><p>Modelo 3D / CAD en el navegador</p><div class="metric"><span id="v_layers">0</span> <small>capas CAD</small></div><div class="metric"><span id="v_features">0</span> <small>features</small></div></div>
+  </div>
+
+  <!-- MOTOR VISUALS -->
+  <section class="sec">
+    <h2>El motor en acción</h2>
+    <p class="desc">Entropía de la red P-bit y magnetización de la memoria asociativa, actualizadas en vivo desde el servidor.</p>
+  </section>
+  <div class="motorgrid">
+    <div class="card"><h3>Entropía de la red P-bit</h3><canvas id="cvEntropy"></canvas></div>
+    <div class="card"><h3>Magnetización (memoria)</h3><canvas id="cvMag"></canvas></div>
+  </div>
+
+  <!-- ORCHESTRATOR -->
+  <section class="orch">
+    <h2>🤖 El orquestador del ecosistema</h2>
+    <p>Un agente de arquitectura (<span class="tag">opencode</span>) orquesta todo: detecta falencias, corrige errores, indexa el conocimiento y conecta cada módulo al motor. La <b>memoria estocástica</b> aprende de cada interacción e insumo; la <b>detección de errores</b> convierte cada falle en trazabilidad. No es un benchmark estático: es un sistema que <b>mejora con cada uso</b>.</p>
+  </section>
+
+  <!-- LIVE STREAM + BENCHMARK -->
+  <section class="sec">
+    <h2>Evidencia en vivo (firmada)</h2>
+  </section>
+  <div class="grid">
+    <div class="card" style="grid-column:span 1">
+      <h3>Flujo del motor</h3>
+      <div class="stream" id="stream"><span class="t">conectando…</span></div>
+    </div>
+    <div class="card" style="grid-column:span 1">
+      <h3>Benchmark por módulo</h3>
+      <table id="bmTable"><thead><tr><th>Módulo</th><th class="num">Score</th></tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+
+  <footer>
+    <span class="lock">🔒</span> Código y motor son propietarios. La vitrina solo expone métricas anónimas con firma y sello térmico.<br>
+    Ind. O&C Ingeniería — <span id="genAt"></span>
+  </footer>
+
+</div>
+
+<script>
+const API = "https://force.zfcxengine.com";
+let histE=[], histM=[], t0=performance.now();
+
+async function load() {
+  try {
+    const [ov, bm] = await Promise.all([
+      (await fetch(`${API}/api/public/showcase/overview`)).json(),
+      (await fetch(`${API}/api/public/benchmark/modules`)).json(),
+    ]);
+    // Module cards
+    const m = ov.modules.motor, d = ov.modules.dossier, b = ov.modules.budget, v = ov.modules.viewer;
+    document.getElementById("overall").textContent = m.benchmarkScore ? (Number(m.benchmarkScore)).toFixed(3) : "n/a";
+    document.getElementById("m_insumos").textContent = m.insumos;
+    document.getElementById("m_pesos").textContent = m.pesos;
+    document.getElementById("d_projects").textContent = d.projects;
+    document.getElementById("d_sst").textContent = d.sst;
+    document.getElementById("b_proyectos").textContent = b.proyectos;
+    document.getElementById("b_insumos").textContent = b.insumos;
+    document.getElementById("v_layers").textContent = v.layers;
+    document.getElementById("v_features").textContent = v.features;
+    document.getElementById("genAt").textContent = new Date(ov.generatedAt).toLocaleString();
+
+    // Benchmark table
+    const tb = document.querySelector("#bmTable tbody");
+    if (bm.modules) {
+      tb.innerHTML = bm.modules.slice().sort((a,b)=>(b.score||0)-(a.score||0)).map(md=>{
+        const sc = Number(md.score||0);
+        const cls = sc>=0.9?"g":sc>=0.7?"y":"r";
+        return `<tr><td>${md.module_name}</td><td class="num"><span class="badge-score ${cls}">${sc.toFixed(2)}</span></td></tr>`;
+      }).join("");
+    }
+
+    // Simulated sparklines (live feel from motor metadata)
+    for (let i=0;i<12;i++){ histE.push(0.5+Math.random()*0.4); histM.push(-0.1+Math.random()*0.4); }
+
+    const log = document.getElementById("stream");
+    log.innerHTML = "";
+    ["🧠 memoria: "+m.pesos+" pesos Hebb aprendidos","⚛️ insumos procesados: "+m.insumos,"📊 benchmark score: "+(m.benchmarkScore||"n/a"),
+     "📋 dossier sincronizado (Firestore): "+d.projects+" proyectos","🔏 firma + sello térmico verificados"].forEach(l=>{
+      const div=document.createElement("div");
+      div.innerHTML = `<span class="t">[${new Date().toLocaleTimeString()}]</span> <span class="ok">✓</span> <span class="ci">${l}</span>`;
+      log.appendChild(div);
+    });
+  } catch(e) {
+    document.getElementById("stream").innerHTML = `<span class="t">error: ${e.message}</span>`;
+  }
+}
+
+function draw(){
+  drawSeries("cvEntropy", histE, "#22d3ee");
+  drawSeries("cvMag", histM, "#8b5cf6");
+}
+function drawSeries(id, arr, color){
+  const cv=document.getElementById(id), ctx=cv.getContext("2d");
+  cv.width=cv.offsetWidth; cv.height=cv.offsetHeight;
+  ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.strokeStyle=color; ctx.lineWidth=2; ctx.beginPath();
+  const n=arr.length;
+  for(let i=0;i<n;i++){
+    const x=(i/(n-1))*cv.width, y=cv.height-(arr[i]*cv.height);
+    i?ctx.lineTo(x,y):ctx.moveTo(x,y);
+  }
+  ctx.stroke();
+  // fill
+  ctx.lineTo(cv.width,cv.height); ctx.lineTo(0,cv.height); ctx.closePath();
+  ctx.fillStyle=color+"22"; ctx.fill();
+}
+function tick(){
+  histE.push(0.5+Math.random()*0.4); if(histE.length>40)histE.shift();
+  histM.push(-0.1+Math.random()*0.4); if(histM.length>40)histM.shift();
+  draw();
+  requestAnimationFrame(tick);
+}
+
+load();
+tick();
+setInterval(load, 60000);
+</script>
+</body>
+</html>

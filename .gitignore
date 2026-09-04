@@ -1,0 +1,18 @@
+# Secrets / credentials — NEVER commit
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+firebase-adminsdk.json
+*admin*.json
+*service-account*.json
+*credential*.json
+.cred
+*.token
+*_secret*
+
+# Sensitive project files
+*.log
+.DS_Store
