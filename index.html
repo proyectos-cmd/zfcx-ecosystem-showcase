@@ -545,12 +545,12 @@ settleBtn.addEventListener("click", () => {
 
   /* ═══════ Núcleo central (el motor) ═══════ */
   const heartGeo = new THREE.IcosahedronGeometry(0.72, 1);
-  const heart = new THREE.Mesh(heartGeo, sapphire(0x38bdf8, 0x0ea5e9, 0.55));
+  const heart = new THREE.Mesh(heartGeo, sapphire(0x1d4ed8, 0x1e3a8a, 0.6));
   heart.position.set(0, 0, 0.4);
   crystalOrbit.add(heart);
   const heartGlow = new THREE.Mesh(
     new THREE.IcosahedronGeometry(0.72, 1),
-    new THREE.MeshBasicMaterial({ color:0x38bdf8, transparent:true, opacity:0.0,
+    new THREE.MeshBasicMaterial({ color:0x1a53c8, transparent:true, opacity:0.0,
       blending:THREE.AdditiveBlending, depthWrite:false })
   );
   heartGlow.scale.setScalar(0.55);
@@ -809,7 +809,7 @@ settleBtn.addEventListener("click", () => {
     heart.rotation.x += dt * 0.3; heart.rotation.y += dt * 0.4;
     const breathe = 1 + Math.sin(t * (0.8 + scoreK)) * 0.06 * scoreK;
     heart.scale.setScalar(breathe);
-    heartGlow.opacity = 0.10 + scoreK * 0.14 + Math.sin(t * 1.2) * 0.05;
+    heartGlow.opacity = 0.14 + scoreK * 0.18 + Math.sin(t * 1.2) * 0.06;
     heartEdge.opacity = 0.12 + scoreK * 0.10;
 
     /* 5 prismas módulos: rotación + flotación (base real de force) */
