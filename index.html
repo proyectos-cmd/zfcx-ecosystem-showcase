@@ -544,12 +544,12 @@ settleBtn.addEventListener("click", () => {
   }
 
   /* ═══════ Núcleo central (el motor) ═══════ */
-  const heartGeo = new THREE.IcosahedronGeometry(0.72, 1);
+  const heartGeo = new THREE.IcosahedronGeometry(0.43, 1);
   const heart = new THREE.Mesh(heartGeo, sapphire(0x1d4ed8, 0x1e3a8a, 0.6));
   heart.position.set(0, 0, 0.4);
   crystalOrbit.add(heart);
   const heartGlow = new THREE.Mesh(
-    new THREE.IcosahedronGeometry(0.72, 1),
+    new THREE.IcosahedronGeometry(0.43, 1),
     new THREE.MeshBasicMaterial({ color:0x1a53c8, transparent:true, opacity:0.0,
       blending:THREE.AdditiveBlending, depthWrite:false })
   );
