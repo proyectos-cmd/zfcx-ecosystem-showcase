@@ -214,7 +214,7 @@
     <p style="margin-top:6px">Presiona ejecutar y observa cómo el coste desciende y el ratio converge hacia el score real del motor.</p>
     <div style="display:flex; gap:10px; align-items:center; margin-top:14px; flex-wrap:wrap">
       <button id="runSettle" style="padding:10px 18px; background:var(--violet); color:#fff; border:none; border-radius:10px; font-weight:700; cursor:pointer; font-size:14px">▶ Ejecutar Settle</button>
-      <span style="font-size:13px; color:var(--muted)">Converge al <b style="color:var(--green)">0.909</b> real</span>
+      <span style="font-size:13px; color:var(--muted)">Converge al score <b style="color:var(--green)" id="settleTarget">real</b> del último benchmark</span>
     </div>
     <canvas id="settleCanvas" style="width:100%; height:160px; margin-top:16px; background:var(--panel2); border-radius:10px"></canvas>
     <div id="settleResult" class="demo-note"></div>
@@ -457,11 +457,12 @@ function drawSettle(points) {
     i ? settleCtx.lineTo(x,y) : settleCtx.moveTo(x,y);
   }
   settleCtx.stroke();
-  // target line at 0.091
-  const t = h-(0.091*h);
-  settleCtx.strokeStyle = "rgba(34,211,238,.5)"; settleCtx.setLineDash([4,4]);
-  settleCtx.beginPath(); settleCtx.moveTo(0,t); settleCtx.lineTo(w,t); settleCtx.stroke();
-  settleCtx.setLineDash([]);
+  // target line: coste = 1 - score real (1-scoreK)
+  const t = h-((1-scoreK)*h);
+    settleCtx.strokeStyle = "rgba(34,211,238,.5)"; settleCtx.setLineDash([4,4]);
+    settleCtx.beginPath(); settleCtx.moveTo(0,t); settleCtx.lineTo(w,t); settleCtx.stroke();
+    settleCtx.setLineDash([]);
+  }
 }
 
 settleBtn.addEventListener("click", () => {
@@ -471,8 +472,9 @@ settleBtn.addEventListener("click", () => {
   const t0 = performance.now();
   function step(now) {
     const t = (now - t0) / 1000;
-    // descenso exponencial hacia 0.091 + ruido decreciente
-    const val = 0.091 + (0.62 - 0.091) * Math.exp(-t * 2.2) + (Math.random()-0.5) * Math.max(0.001, 0.12 * Math.exp(-t*3));
+    // descenso exponencial hacia 1-scoreK (score real) + ruido decreciente
+    const v0 = 1 - scoreK;
+    const val = v0 + (0.62 - v0) * Math.exp(-t * 2.2) + (Math.random()-0.5) * Math.max(0.001, 0.12 * Math.exp(-t*3));
     pts.push(val);
     if (pts.length > 90) pts.shift();
     drawSettle(pts);
@@ -481,7 +483,7 @@ settleBtn.addEventListener("click", () => {
     } else {
       settleAnim = null;
       const ratio = 1 - val;
-      settleResult.innerHTML = `✅ Convergió: coste final <b>${val.toFixed(4)}</b> → ratio <b style="color:var(--green)">${ratio.toFixed(4)}</b> (objetivo real: <b>0.9090</b>). <span style="color:var(--amber)">Simulación calibrada en el navegador — no ejecutó cómputo en el servidor.</span>`;
+      settleResult.innerHTML = `✅ Convergió: coste final <b>${val.toFixed(4)}</b> → ratio <b style="color:var(--green)">${ratio.toFixed(4)}</b> (objetivo real: <b>${(1-scoreK).toFixed(4)}</b>). <span style="color:var(--amber)">Simulación calibrada en el navegador — no ejecutó cómputo en el servidor.</span>`;
     }
   }
   settleAnim = requestAnimationFrame(step);
