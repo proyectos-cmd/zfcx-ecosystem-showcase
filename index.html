@@ -452,13 +452,14 @@ function drawSettle(points) {
   settleCtx.strokeStyle = "#34d399"; settleCtx.lineWidth = 2;
   settleCtx.beginPath();
   const n = points.length;
+  // se grafica el SCORE (1 - coste) => curva ASCENDENTE hacia el score real (estabilizacion, no caida)
   for (let i=0;i<n;i++){
-    const x = (i/(n-1))*w, y = h-(points[i]*h);
+    const x = (i/(n-1))*w, y = h-((1-points[i])*h);
     i ? settleCtx.lineTo(x,y) : settleCtx.moveTo(x,y);
   }
   settleCtx.stroke();
-  // target line: coste = 1 - score real (1-scoreK)
-  const t = h-((1-scoreK)*h);
+  // target dashed: el score real scoreK (donde estabiliza)
+  const t = h-(scoreK*h);
     settleCtx.strokeStyle = "rgba(34,211,238,.5)"; settleCtx.setLineDash([4,4]);
     settleCtx.beginPath(); settleCtx.moveTo(0,t); settleCtx.lineTo(w,t); settleCtx.stroke();
     settleCtx.setLineDash([]);
