@@ -421,7 +421,7 @@ function openModal(key) {
   document.getElementById("mTags").innerHTML = mod.tags.map(t=>`<span class="tag">${t}</span>`).join("");
   const o = ovCache.ov ? ovCache.ov.modules : null;
   const ds = o ? {
-    m_insumos: o.motor.insumos, m_pesos: o.motor.pesos, m_score: o.motor.benchmarkScore ? (Number(o.motor.benchmarkScore)).toFixed(3):"—",
+    m_insumos: o.motor.insumos, m_pesos: o.motor.pesos, m_score: (function(){var M=o.motor||o,ks=Object.keys(M).filter(function(k){return typeof M[k]==="number"&&isFinite(M[k])&&M[k]>0;}),v=ks.length?Number(M[ks[0]]):(typeof o.overall==="number"?Number(o.overall):NaN);return isFinite(v)?v.toFixed(3):"—";})(), // fix: score real = 1er numerico de o.motor (robusto a cambio de nombre)
     d_projects: o.dossier.projects, d_sst: o.dossier.sst,
     b_proyectos: o.budget.proyectos, b_partidas: o.budget.partidas, b_insumos: o.budget.insumos, b_apus: o.budget.apus,
     v_layers: o.viewer.layers, v_dems: o.viewer.dems || 0, v_lots: o.viewer.lots || 0,
