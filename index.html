@@ -489,6 +489,16 @@ settleBtn.addEventListener("click", () => {
   settleAnim = requestAnimationFrame(step);
 });
 
+// ── scoreK global (usado por playground settle + crystals + sync) ──
+let scoreK = 0.909;
+(function syncScore(){
+  fetch(`${API}/api/public/benchmark/summary`).then(r=>r.json()).then(d=>{
+    const sc = Number(d.overall_score);
+    if (!isNaN(sc)) scoreK = Math.min(Math.max(sc, 0.5), 1);
+  }).catch(()=>{});
+  setTimeout(syncScore, 60000);
+})();
+
 // ── Fondo 3D: Crystal System de zafiro (mejorado) ──
 // Base reutilizada de force.zfcxengine.com (benchmark.html) y mejorada:
 //  · 5 prismas de zafiro = los 5 módulos del ecosistema
@@ -778,15 +788,7 @@ settleBtn.addEventListener("click", () => {
   resize();
   window.addEventListener('resize', resize);
 
-  /* ═══════ Sincronización con el score real (mejora sobre force) ═══════ */
-  let scoreK = 0.909;
-  (function syncScore(){
-    fetch(`${API}/api/public/benchmark/summary`).then(r=>r.json()).then(d=>{
-      const sc = Number(d.overall_score);
-      if (!isNaN(sc)) scoreK = Math.min(Math.max(sc, 0.5), 1);
-    }).catch(()=>{});
-    setTimeout(syncScore, 60000);
-  })();
+  /* ═══════ scoreK + syncScore ya en scope global (antes de initCrystals) ═══════ */
 
   /* ═══════ Animación ═══════ */
   let t = 0;
